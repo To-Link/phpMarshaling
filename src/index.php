@@ -1,6 +1,27 @@
 <?php
 	class phpMarshaling{ 
-		public static $dbPath = "";
+		public static $dbPath = "/usr/share/phpMarshaling";
+
+		public static function init() {
+			$file = fopen(self::$dbPath.".phpMarshalingInit", "w");
+			fwrite($file, " ");
+			fclose($file);
+		}
+
+		public static function clearInit() {
+			unlink(self::$dbPath.".phpMarshalingInit");
+		}
+
+		public static function isInit() {
+			$check_file = file(self::$dbPath.".phpMarshalingInit");
+
+			if($check_file) {
+				return TRUE;
+			}
+			else {
+				return FALSE;
+			}
+		}
 
 		public static function createTable($tableName) {
 			$DB = new SQLite3(self::$dbPath."phpMarshaling.sqlite");
@@ -16,7 +37,7 @@
 
 		public static function insert($tableName, $dataId, $value=0) {
 			$DB = new SQLite3(self::$dbPath."phpMarshaling.sqlite");
-			$DB->busyTimeout(1000);
+			$DB->busyTimeout(2000);
 			$escaped_tableName = Sqlite3::escapeString(($tableName));
 			$escaped_dataId = Sqlite3::escapeString(($dataId));
 			$escaped_value = Sqlite3::escapeString(($value));
@@ -26,6 +47,37 @@
 			";
 
 			return $DB->exec($insert_query);
+		}
+
+		/**
+		 * @param [int](string, string, string) $dataSet 
+		 * 		array  of tuple ($tableName, $dataId, $value)
+		*/
+		public static function insertTransaction($dataSet) {
+			$query = 'BEGIN;';
+
+			foreach($dataSet as $data) {
+
+				$DB = new SQLite3(self::$dbPath."phpMarshaling.sqlite");
+				$DB->busyTimeout(2000);
+				$escaped_tableName = Sqlite3::escapeString($data[0]);
+				$escaped_dataId = Sqlite3::escapeString($data[1]);
+
+				if(isset($data[2])) {
+					$escaped_value = Sqlite3::escapeString($data[2]);
+				} 
+				else {
+					$escaped_value = 0;
+				}
+
+				$query .= "INSERT INTO $escaped_tableName(dataId, value) 
+					VALUES('$escaped_dataId', '$escaped_value');
+				";
+			}
+
+			$query .= 'END;';
+
+			return $DB->exec($query);
 		}
 
 		public static function clean($tableName, $dataId) {

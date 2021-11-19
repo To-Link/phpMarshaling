@@ -3,6 +3,15 @@
 $require_path = dirname(__FILE__)."../index.php";
 require_once($require_path);
 
+	// Initalized..
+if(!phpMarshaling::isInit()) {
+	phpMarshaling::createTable("ClickStats");
+	phpMarshaling::createTable("UserStats");
+	phpMarshaling::createTable("CountryStats");
+
+	phpMarshaling::init();
+}
+
 $rows = phpMarshaling::getAllWithClean("ClickStats");
 
 // UPDATE TO DATABASE
