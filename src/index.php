@@ -2,10 +2,17 @@
 	class phpMarshaling{ 
 		public static $dbPath = "/usr/share/phpMarshaling";
 
-		public static function init() {
+		public static function init($username=NULL) {
 			$file = fopen(self::$dbPath.".phpMarshalingInit", "w");
 			fwrite($file, " ");
 			fclose($file);
+
+			chmod(self::$dbPath."phpMarshaling.sqlite", 0666);
+
+			if(isset($username)) {
+				chown($username, $username);
+				chmod(self::$dbPath."phpMarshaling.sqlite", 0666);
+			}
 		}
 
 		public static function clearInit() {
@@ -13,14 +20,7 @@
 		}
 
 		public static function isInit() {
-			$check_file = file(self::$dbPath.".phpMarshalingInit");
-
-			if($check_file) {
-				return TRUE;
-			}
-			else {
-				return FALSE;
-			}
+			return file_exists(self::$dbPath.".phpMarshalingInit");
 		}
 
 		public static function createTable($tableName) {
@@ -77,7 +77,9 @@
 
 			$query .= 'END;';
 
-			return $DB->exec($query);
+			$DB->exec($query);
+
+			return ;
 		}
 
 		public static function clean($tableName, $dataId) {
