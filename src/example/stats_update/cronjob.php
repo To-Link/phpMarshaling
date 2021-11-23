@@ -3,22 +3,30 @@
 $require_path = dirname(__FILE__)."../index.php";
 require_once($require_path);
 
-	// Initalized..
-if(!phpMarshaling::isInit()) {
-	phpMarshaling::createTable("ClickStats");
-	phpMarshaling::createTable("UserStats");
-	phpMarshaling::createTable("CountryStats");
+$cache = new phpMarshaling();
 
-	phpMarshaling::init();
+// Initalized..
+if(!$cache->isInit()) {
+	$cache->createTable("ClickStats");
+
+	$cache->init();
 }
 
-$rows = phpMarshaling::getAllWithClean("ClickStats");
+$rows = $cache->getAll("ClickStats");
+
+$isUpdate = count($rows);
+
+if($isUpdate < 1) {
+	// Don't need to update.
+	return;
+}
 
 // UPDATE TO DATABASE
 $db_host = "your_host";
 $db_dbname = "your_db";
 $db_user = "your_user";
 $db_password = "your_password";
+
 $remote_database = new PDO("mysql:host=$db_host;dbname=$db_dbname", $db_user, $db_password);
 
 foreach( $rows as $row) {
