@@ -4,12 +4,10 @@ $require_path = dirname(__FILE__)."/index.php";
 
 require_once($require_path);
 
-$dataSet = [
-	["ClickStats", 236643],
-	["UserStats", 236643, 5321],
-	["CountryStats", 236643, 'Korea']
-]
+$cache = new phpMarshaling();
+$cache->connect();
 
-phpMarshaling::insertTransaction($dataSet);
+$cache->insert("DefaultStats", "1");
+$cache->insertColumns("ProStats", [["dataId", "1"], ["os", "Windows"], ["browser", "Chrome"], ["country", "Republic of Korea"]]);
 
 ?>
