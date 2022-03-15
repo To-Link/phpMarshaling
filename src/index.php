@@ -145,6 +145,17 @@ class phpMarshaling{
         return ;
     }
 
+    public function updateTransaction($tableName, $rowId, $column, $value) {
+        $escaped_tableName = Sqlite3::escapeString(($tableName));
+        $escaped_rowId = Sqlite3::escapeString(($rowId));
+        $escaped_column = Sqlite3::escapeString(($column));
+        $escaped_value = Sqlite3::escapeString(($value));
+
+        $delete_query = "UPDATE $escaped_tableName SET $escaped_column=$escaped_value WHERE rowid=$escaped_rowId";
+
+        return $this->DB->exec($delete_query);
+    }
+
     public function clean($tableName, $dataId) {
         $escaped_tableName = Sqlite3::escapeString(($tableName));
         $escaped_dataId = Sqlite3::escapeString(($dataId));
