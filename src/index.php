@@ -5,6 +5,7 @@
 class phpMarshaling{ 
     public static $dbPath = "/usr/share/phpMarshaling";
     public static $max_db = 20;
+    public static $connection_timeout = self::$max_db*0.5+30;
 
     public function __construct()
     {
@@ -14,7 +15,7 @@ class phpMarshaling{
         if(!isset($db_number)) { 
             $db_number = rand(0, self::$max_db-1);
             $this->DB = new SQLite3(self::$dbPath."phpMarshaling.sqlite".$db_number);
-            $this->DB->busyTimeout(self::$max_db*0.5+30);
+            $this->DB->busyTimeout(self::$connection_timeout);
             return;
         }
 
@@ -23,27 +24,27 @@ class phpMarshaling{
         return;
     }
 
-    public static function init($username=NULL) {
-        $file = fopen(self::$dbPath.".phpMarshalingInit", "w");
+    public static function init($initFlag="") {
+        $file = fopen(self::$dbPath."/.$initFlag.phpMarshalingInit", "w");
         fwrite($file, " ");
         fclose($file);
 
         for($i=0; $i<self::$max_db; $i++){
-            chmod(self::$dbPath."phpMarshaling.sqlite".$i, 0666);
+            chmod(self::$dbPath."/.$initFlag.phpMarshaling.sqlite".$i, 0666);
 
             if(isset($username)) {
                 chown($username, $username);
-                chmod(self::$dbPath."phpMarshaling.sqlite".$i, 0666);
+                chmod(self::$dbPath."/.$initFlag.phpMarshaling.sqlite".$i, 0666);
             }
         }
     }
 
-    public function clearInit() {
-        unlink(self::$dbPath.".phpMarshalingInit");
+    public function clearInit($initFlag="") {
+        unlink(self::$dbPath."/.$initFlag.phpMarshalingInit");
     }
 
-    public static function isInit() {
-        return file_exists(self::$dbPath.".phpMarshalingInit");
+    public static function isInit($initFlag="default") {
+        return file_exists(self::$dbPath."/.$initFlag.phpMarshalingInit");
     }
 
     public function createTable($tableName) {
